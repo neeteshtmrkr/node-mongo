@@ -8,35 +8,39 @@ const dbname='conFusion';
 
 //accesing server
 //connect method allows us to connect to mongoclient from mongo db server
-MongoClient.connect(url,(err,client)=>{
-
-    assert.equal(err,null);
-
+MongoClient.connect(url).then((client)=>{
     console.log('Connection successful to server');
-
     const db=client.db(dbname);
     
-    dboper.insertDocument(db,{name: "Vadonut",description:"Test"},'dishes',(result)=>{
+    dboper.insertDocument(db,{name: "Vadonut",description:"Test"},'dishes')
+    .then((result)=>{
 
         console.log('Insert Document:\n',result.ops);
 
-        dboper.findDocument(db,'dishes',(docs)=>{
-            console.log('Found Documents:\n',docs);
+        return dboper.findDocument(db,'dishes')
+    })
+    .then((docs)=>{
+        console.log('Found Documents:\n',docs);
 
-            dboper.updateDocument(db,{name:'Vadonut'},{description:'Updated Test'},'dishes',(result)=>{
+        return dboper.updateDocument(db,{name:'Vadonut'},{description:'Updated Test'},'dishes')
+    })
+    .then((result)=>{
 
-                console.log('Updated Document:\n',result.result);
+        console.log('Updated Document:\n',result.result);
 
-                dboper.findDocument(db,'dishes',(docs)=>{
-                    console.log('Found Documents:\n',docs);
+        return dboper.findDocument(db,'dishes')
+    })
+    .then((docs)=>{
+        console.log('Found Documents:\n',docs);
 
-                    db.dropCollection('dishes',(result)=>{
-                        console.log('Dropeed Collection',result);
+        return db.dropCollection('dishes')
+    })
+    .then((result)=>{
+        console.log('Dropeed Collection',result);
 
-                        client.close();
-                    });
-                })
-            })
-        })
-    });
-});
+        client.close();
+    })
+    .catch((err)=>console.log(err));
+                   
+})
+.catch((err)=>console.log(err));
